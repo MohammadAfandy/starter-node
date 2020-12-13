@@ -1,7 +1,7 @@
 {
-  "name": "sc-backend",
+  "name": "starter-backend",
   "version": "1.0.0",
-  "description": "shop commerce backend",
+  "description": "starter node backend",
   "main": "index.js",
   "scripts": {
     "start": "node index",
