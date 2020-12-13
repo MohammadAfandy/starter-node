@@ -2,7 +2,7 @@ const appRoot = require('app-root-path');
 require("dotenv").config();
 
 const checkFalsyEnv = (value) => {
-  if (value.toLowerCase() === 'false') {
+  if (value && value.toLowerCase() === 'false') {
     return false;
   }
   return true;

@@ -50,12 +50,17 @@ const options = {
   }
 };
 
+let transports = [
+  new winston.transports.File(options.file),
+  new winston.transports.Console(options.console),
+]
+
+if (logging.telegram.status) {
+  transports.push(new TelegramLogger(options.telegram));
+}
+
 let logger = new winston.createLogger({
-  transports: [
-    new winston.transports.File(options.file),
-    new winston.transports.Console(options.console),
-    new TelegramLogger(options.telegram),
-  ],
+  transports: transports,
   exitOnError: false,
   format: winston.format.combine(
     errorFormat(),
