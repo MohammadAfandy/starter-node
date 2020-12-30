@@ -46,7 +46,7 @@ const options = {
     chatId: logging.telegram.chatId,
     handleExceptions: true,
     level: "warn",
-    silent: !logging.telegram.status,
+    silent: !logging.telegram.enable,
   }
 };
 
@@ -55,7 +55,7 @@ let transports = [
   new winston.transports.Console(options.console),
 ]
 
-if (logging.telegram.status) {
+if (logging.telegram.enable) {
   transports.push(new TelegramLogger(options.telegram));
 }
 

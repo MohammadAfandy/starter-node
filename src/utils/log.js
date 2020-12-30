@@ -85,8 +85,8 @@ const insertLog = async (type, dataLog, instance) => {
       if (instance) {
         insertLog = await instance.sequelize.models[type].create(dataLog);
       } else {
-        const { log_request } = appRequire("models");
-        insertLog = await log_request.create(dataLog);
+        const { [type]: model } = appRequire("models");
+        insertLog = await model.create(dataLog);
       }
     } else if (logging.dialect === "mongo") {
       insertLog = await mongoConnection.db.collection(type).insertOne(dataLog);
