@@ -1,11 +1,5 @@
 module.exports = (sequelize, Sequelize, options) => {
-  // options.hooks["beforeCreate"] = async (instance, options) => {
-  //   console.log("instancepassword", instance.password);
-  //   options.validate = false;
-  //   instance.password = await stringLib.generatePassword(instance.password);
-  // };
-
-  const user = sequelize.define("user", {
+  const model = sequelize.define("user", {
     id: {
       type: Sequelize.INTEGER,
       primaryKey: true,
@@ -60,11 +54,11 @@ module.exports = (sequelize, Sequelize, options) => {
     },
   }, options);
 
-  user.prototype.toJSON = function () {
+  model.prototype.toJSON = function () {
     let values = Object.assign({}, this.get());
     delete values.password;
     return values;
   };
 
-  return user;
+  return model;
 };

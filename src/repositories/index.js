@@ -45,7 +45,7 @@ class BaseRepository {
   setWhere(where, isUpdateOrDelete = false) {
     this.where = {};
     if (isUpdateOrDelete) {
-      if (!where || typeof where !== "object") {
+      if (!where || !isObject(where)) {
         throw new Error("Where Must be an Object");
       }
   

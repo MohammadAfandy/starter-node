@@ -1,6 +1,7 @@
 const Sequelize = require("sequelize");
 const config = appRequire("config");
 const logger = appRequire("config", "logger");
+const { logRequest } = appRequire("utils", "log");
 
 const handleSequelizeError = (err, response) => {
   if (err instanceof Sequelize.ValidationError) {
@@ -33,15 +34,11 @@ const handleValidationError = (err, response) => {
       return {
         param: v.param,
         message: v.msg,
-        value: v.value,
       }
     });
   }
 
   return response;
-};
-
-const formatValidationError = (errors) => {
 };
 
 module.exports = app => {
@@ -61,6 +58,7 @@ module.exports = app => {
       response.message = message || "Success";
       response.data = data || {};
 
+      logRequest(response.code, req, response);
       logger.http(`${response.path} - ${response.code} - ${response.message}`);
       res.status(response.code).json(response)
     }
@@ -70,6 +68,7 @@ module.exports = app => {
       response.message = message || "Not Found";
       response.error = {};
 
+      logRequest(response.code, req, response);
       logger.info(`${response.path} - ${response.code} - ${response.message}`);
       res.status(response.code).json(response)
     }
@@ -93,6 +92,7 @@ module.exports = app => {
         logger.error(err);
       }
 
+      logRequest(response.code, req, response);
       res.status(response.code).json(response)
     }
 

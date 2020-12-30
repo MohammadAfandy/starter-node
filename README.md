@@ -5,10 +5,20 @@
 ## Quick Start
 
 ```bash
+git clone git@github.com:MohammadAfandy/starter-node.git
+
 # Install dependencies
 npm install
 
-# Start Express Server: http://localhost:3000
+# Copy / rename .env.example to .env
+
+# Run migration
+sequelize db:migrate
+
+# Run seeder (optional)
+sequelize db:seed:all
+
+# Start Express Server
 npm start
 ```
 

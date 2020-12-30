@@ -51,7 +51,10 @@ exports.register = async (req, res, next) => {
       userData.password = await stringLib.generatePassword(userData.password);
       let user = await userRepo.create({ data: userData, addOptions: { transaction: t } });
       for (let i in roles) {
-        await userRoleRepo.create({ data: { user_id: user.id, role_id: roles[i].id }, addOptions: { transaction: t } });
+        await userRoleRepo.create({
+          data: { user_id: user.id, role_id: roles[i].id },
+          addOptions: { transaction: t }
+        });
       }
       res.success(user, "Registration Success");
     });
@@ -102,7 +105,7 @@ exports.login = async (req, res, next) => {
     } else { // token not exist, create new token
       tokenData = await tokenRepo.createToken(userData.id, device);
     }
-    // ==================== Start Token Generation Process ====================
+    // ==================== End Token Generation Process ====================
     
     res.success({
       username: userData.username,

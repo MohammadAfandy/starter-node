@@ -1,8 +1,8 @@
 const { rootPath } = require("../config");
 const fs = require("fs");
 
-global.appRequire = (moduleName, fileName = "index") => {
-  const availableModule = [
+const appRequire = (moduleName, fileName = "index") => {
+  const availableModules = [
     "config",
     "controllers",
     "libs",
@@ -14,7 +14,7 @@ global.appRequire = (moduleName, fileName = "index") => {
     "utils",
     "validators",
   ];
-  if (availableModule.indexOf(moduleName) <= -1) throw new Error(`Module '${moduleName}' not available`);
+  if (availableModules.indexOf(moduleName) <= -1) throw new Error(`Module '${moduleName}' not available`);
 
   let path = `${rootPath}/src/${moduleName}/${fileName}`;
 
@@ -29,4 +29,14 @@ global.appRequire = (moduleName, fileName = "index") => {
   return require(path);
 }
 
+const isArray = (array) => {
+  return Array.isArray(array);
+}
+
+const isObject = (object) => {
+  return (!!object) && (object.constructor === Object);
+}
+
 exports.appRequire = appRequire;
+exports.isArray = isArray;
+exports.isObject = isObject;

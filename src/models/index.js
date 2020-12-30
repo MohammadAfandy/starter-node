@@ -1,35 +1,18 @@
 const Sequelize = require("sequelize");
-const { db: dbConfig, logging, mongo } = appRequire("config");
-const MongoConnection = appRequire("config", "mongo");
+const { db: dbConfig } = appRequire("config");
 const logger = appRequire("config", "logger");
-const mongoConnection = new MongoConnection();
+const { logAuditDb } = appRequire("utils", "log");
 
 const myLogging = (queryString, queryObject) => {
-  console.log(queryString);
-  if (queryObject.bind) console.log(queryObject.bind);
+  logger.info(queryString);
+  if (queryObject.bind) logger.info(queryObject.bind);
 }
 
-const insertLogMongo = async (instance, type) => {
-  if (mongo.enable && logging.auditDb) {
-    try {
-      let insertLog = await mongoConnection.db.collection("audit_db_log").insertOne({
-        model: instance.constructor.getTableName(),
-        action: type,
-        model_id: instance.id,
-        previous_data: instance._previousDataValues,
-        data: instance.dataValues,
-        timestamp: new Date(),
-      });
-      return insertLog;
-    } catch (error) {
-      logger.error(error);
-    }
-  }
-}
 
 // connect to sequelize
 const sequelize = new Sequelize(dbConfig.dbName, dbConfig.username, dbConfig.password, {
   host: dbConfig.host,
+  port: dbConfig.port || 3306,
   dialect: dbConfig.dialect,
   timezone: dbConfig.timezone,
   logging: dbConfig.logging && myLogging,
@@ -55,24 +38,21 @@ let options = {
      * individualHooks must set to true when updating / deleting instance
      * log to mongodb
      */
-    afterCreate: (instance, options) => {
-      insertLogMongo(instance, "create");
-    },
-    afterUpdate: (instance, options) => {
-      insertLogMongo(instance, "update");
-    },
-    afterDestroy: (instance, options) => {
-      insertLogMongo(instance, "delete");
-    },
+    afterCreate: (instance, options) => logAuditDb(instance, "create"),
+    afterUpdate: (instance, options) => logAuditDb(instance, "update"),
+    afterDestroy: (instance, options) => logAuditDb(instance, "delete"),
     /** ============ end logging every CRUD operation ============ **/
 
-    beforeUpdate: (instance, options) => {
-      instance.updated_at = new Date();
-    },
+    beforeUpdate: (instance, options) => instance.updated_at = new Date(),
   },
 };
 
 // ========================== MODEL ASSIGNMENT ==========================
+
+// list of model that doesn't use default options
+db.log_audit_db = appRequire("models", "log_audit_db")(sequelize, Sequelize);
+db.log_request = appRequire("models", "log_request")(sequelize, Sequelize);
+
 db.user = appRequire("models", "user")(sequelize, Sequelize, options);
 db.role = appRequire("models", "role")(sequelize, Sequelize, options);
 db.user_role = appRequire("models", "user_role")(sequelize, Sequelize, options);
@@ -87,10 +67,5 @@ db.user.hasMany(db.token, { foreignKey: "user_id" });
 db.token.belongsTo(db.user, { foreignKey: "user_id" });
 db.category.hasMany(db.product, { foreignKey: "category_id" });
 db.product.belongsTo(db.category, { foreignKey: "category_id" });
-
-if (mongo.enable) {
-  mongoConnection.init();
-  db.mongoConnection = mongoConnection;
-}
 
 module.exports = db;

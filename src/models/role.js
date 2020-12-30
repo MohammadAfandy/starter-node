@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize, options) => {
-  const role = sequelize.define("role", {
+  const model = sequelize.define("role", {
     id: {
       type: Sequelize.INTEGER,
       primaryKey: true,
@@ -31,5 +31,5 @@ module.exports = (sequelize, Sequelize, options) => {
     },
   }, { ...options });
 
-  return role;
+  return model;
 };

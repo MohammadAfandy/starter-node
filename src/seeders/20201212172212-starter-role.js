@@ -8,6 +8,9 @@ module.exports = {
     }, {
       role_name: "Admin",
       description: "Role for Administrating"
+    }, {
+      role_name: "Public",
+      description: ""
     }];
     await queryInterface.bulkInsert('role', roleData);
   },

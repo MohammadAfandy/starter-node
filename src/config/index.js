@@ -34,8 +34,10 @@ module.exports = {
   logging: {
     file: checkFalsyEnv(process.env.APP_FILE_LOG),
     auditDb: checkFalsyEnv(process.env.AUDIT_DB_LOG),
+    request: checkFalsyEnv(process.env.REQUEST_LOG),
+    dialect: process.env.DIALECT_LOG,
     telegram: {
-      status: checkFalsyEnv(process.env.TELEGRAM_LOG),
+      enable: checkFalsyEnv(process.env.TELEGRAM_LOG),
       token: process.env.TELEGRAM_TOKEN,
       chatId: process.env.TELEGRAM_CHAT_ID,
     },
