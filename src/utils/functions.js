@@ -1,5 +1,6 @@
-const { rootPath } = require("../config");
+const { rootPath, uploadDir } = require("../config");
 const fs = require("fs");
+const moment = require("moment");
 
 const appRequire = (moduleName, fileName = "index") => {
   const availableModules = [
@@ -29,14 +30,81 @@ const appRequire = (moduleName, fileName = "index") => {
   return require(path);
 }
 
-const isArray = (array) => {
-  return Array.isArray(array);
+const isString = string => typeof string === "string";
+
+const isArray = array => Array.isArray(array)
+
+const isObject = object => Object.prototype.toString.call(object) === "[object Object]";
+
+const getIpAddress = (req) => {
+  let ip = req.headers["x-forwarded-for"];
+  if (!ip) ip = req.connection.remoteAddress;
+  if (!ip) ip = req.socket.remoteAddres;
+  if (!ip) ip = (req.connection.socket ? req.connection.socket.remoteAddress : null);
+
+  return ip || null;
 }
 
-const isObject = (object) => {
-  return (!!object) && (object.constructor === Object);
+const makeDir = dir => {
+  let process;
+  if (!fs.existsSync(dir)) {
+    process = fs.mkdirSync(dir, { recursive: true })
+  };
+
+  return process
 }
+
+const moveUploadedFile = (files, fieldName, destination, newFileName, withTimeStamp = true) => {
+  return new Promise((resolve, reject) => {
+    const file = files.filter(v => v.fieldname === fieldName)[0];
+    if (!file) reject(new Error("Invalid req.files fieldname"));
+
+    const type = file.mimetype.split("/")[0];
+    const now = new Date();
+    const curDate = moment(now).format("YYYY-MM-DD");
+    let newUploadDir = "";
+    if (destination) {
+      newUploadDir = destination;
+    } else {
+      newUploadDir = type + "/" + curDate;
+    }
+    const newFullUploadDir = uploadDir + "/" + newUploadDir;
+    let filename = "";
+    if (newFileName) {
+      filename = newFileName;
+    } else {
+      filename = file.originalname.split('.').slice(0, -1).join('.');
+    }
+    if (withTimeStamp) {
+      filename += "_" + Math.round(now.getTime() / 1000);
+    }
+    const extension = file.originalname.split('.').pop();
+    const fullname =  filename + "." + extension;
+    makeDir(newFullUploadDir);
+
+    const newDest = newFullUploadDir + "/" + fullname;
+    const source = fs.createReadStream(file.path);
+    const dest = fs.createWriteStream(newDest);
+
+    const res = {
+      fulldir: newFullUploadDir,
+      dir: newUploadDir,
+      filename: filename,
+      extension: extension,
+      fullname: fullname,
+      fullpathname: newDest,
+    }
+
+    source.pipe(dest);
+    source.on("end", () => resolve(res));
+    source.on("error", (err) => reject(new Error(err)));
+  }
+)};
 
 exports.appRequire = appRequire;
+exports.isString = isString;
 exports.isArray = isArray;
 exports.isObject = isObject;
+exports.getIpAddress = getIpAddress;
+exports.makeDir = makeDir;
+exports.moveUploadedFile = moveUploadedFile;

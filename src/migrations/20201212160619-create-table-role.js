@@ -33,7 +33,7 @@ module.exports = {
         type: Sequelize.DATE,
       },
     }).then(() => {
-      queryInterface.addIndex('role', ['role_name'], { name: 'idx_role_name' });
+      queryInterface.addIndex('role', ['role_name'], { name: 'idx_role_role_name' });
     });
   },
 

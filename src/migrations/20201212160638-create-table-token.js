@@ -25,7 +25,7 @@ module.exports = {
         allowNull: false,
         references: {
           model: {
-            tableName: 'user',
+            tableName: 'users',
             key: 'id',
           },
         },
@@ -53,13 +53,13 @@ module.exports = {
         type: Sequelize.DATE,
       },
     }).then(() => {
-      queryInterface.addIndex('token', ['access_token'], { name: 'idx_access_token' });
-      queryInterface.addIndex('token', ['refresh_token'], { name: 'idx_refresh_token' });
-      queryInterface.addIndex('token', ['device'], { name: 'idx_device' });
-      queryInterface.addIndex('token', ['user_id'], { name: 'idx_user_id' });
-      queryInterface.addIndex('token', ['created_at'], { name: 'idx_created_at' });
-      queryInterface.addIndex('token', ['access_token_expired_at'], { name: 'idx_access_token_expired_at' });
-      queryInterface.addIndex('token', ['refresh_token_expired_at'], { name: 'idx_refresh_token_expired_at' });
+      queryInterface.addIndex('token', ['access_token'], { name: 'idx_token_access_token' });
+      queryInterface.addIndex('token', ['refresh_token'], { name: 'idx_token_refresh_token' });
+      queryInterface.addIndex('token', ['device'], { name: 'idx_token_device' });
+      queryInterface.addIndex('token', ['user_id'], { name: 'idx_token_user_id' });
+      queryInterface.addIndex('token', ['created_at'], { name: 'idx_token_created_at' });
+      queryInterface.addIndex('token', ['access_token_expired_at'], { name: 'idx_token_access_token_expired_at' });
+      queryInterface.addIndex('token', ['refresh_token_expired_at'], { name: 'idx_token_refresh_token_expired_at' });
     });
   },
 

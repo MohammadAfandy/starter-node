@@ -10,7 +10,7 @@ module.exports = {
         allowNull: false,
       },
       code: {
-        type: Sequelize.INTEGER(3),
+        type: Sequelize.INTEGER,
         allowNull: false,
       },
       path: {
@@ -30,14 +30,17 @@ module.exports = {
       response: {
         type: Sequelize.TEXT,
       },
+      ip_address: {
+        type: Sequelize.STRING(30),
+      },
       timestamp: {
         type: Sequelize.DATE,
         defaultValue: Sequelize.NOW,
       },
     }).then(() => {
-      queryInterface.addIndex('log_request', ['code'], { name: 'idx_code' });
-      queryInterface.addIndex('log_request', ['path'], { name: 'idx_path' });
-      queryInterface.addIndex('log_request', ['timestamp'], { name: 'idx_timestamp' });
+      queryInterface.addIndex('log_request', ['code'], { name: 'idx_log_request_code' });
+      queryInterface.addIndex('log_request', ['path'], { name: 'idx_log_request_path' });
+      queryInterface.addIndex('log_request', ['timestamp'], { name: 'idx_log_request_timestamp' });
     });
   },
 

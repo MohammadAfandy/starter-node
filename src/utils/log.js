@@ -9,40 +9,35 @@ if (mongo.enable) {
 
 const logAuditDb = async (instance, action) => {
   let process;
-  if (logging.auditDb) {
-    let primaryKey = instance.constructor.primaryKeyAttributes[0];
-    let dataLog = {
-      table: instance.constructor.getTableName(),
-      action: action,
-      primary_field: primaryKey,
-      primary_value: instance[primaryKey],
-      previous_data: instance._previousDataValues,
-      data: instance.dataValues,
-      timestamp: new Date(),
-    };
+  let primaryKey = instance.constructor.primaryKeyAttributes[0];
+  let dataLog = {
+    table: instance.constructor.getTableName(),
+    action: action,
+    primary_field: primaryKey,
+    primary_value: instance[primaryKey],
+    previous_data: instance._previousDataValues,
+    data: instance.dataValues,
+    timestamp: new Date(),
+  };
 
-    process = await insertLog("log_audit_db", dataLog, instance);
-  }
+  process = await insertLog("log_audit_db", dataLog, instance);
 
   return process;
 }
 
 const logRequest = async (code, request, response) => {
   let process;
-  if (logging.request) {
-    let dataLog = {
-      code: code,
-      path: request.originalUrl,
-      method: request.method,
-      header: request.headers,
-      body: request.body,
-      response: response,
-      timestamp: new Date(),
-    };
-
-    process = await insertLog("log_request", dataLog);
-  }
-
+  let dataLog = {
+    code: code,
+    path: request.originalUrl,
+    method: request.method,
+    header: request.headers,
+    body: request.body,
+    response: response,
+    ip_address: getIpAddress(request),
+    timestamp: new Date(),
+  };
+  process = await insertLog("log_request", dataLog);
   return process;
 }
 
@@ -56,7 +51,7 @@ const maskSensitive = obj => {
   const mask_value = "[masked]";
 
   for (let prop in obj) {
-    if (obj.hasOwnProperty(prop)) {
+    if (prop in obj) {
       if (typeof obj[prop] === "object") {
         maskSensitive(obj[prop]);
       } else {

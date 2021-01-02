@@ -1,10 +1,6 @@
 const { validationResult } = require('express-validator');
 
 module.exports = (body) => {
-  body = body.map(v => {
-    return v.trim().escape();
-  });
-
   return [
     ...body,
     (req, res, next) => {

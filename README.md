@@ -12,6 +12,8 @@ npm install
 
 # Copy / rename .env.example to .env
 
+# Create folder logs and uploads
+
 # Run migration
 sequelize db:migrate
 

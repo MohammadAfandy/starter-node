@@ -3,6 +3,7 @@ const RoleRepository = appRequire("repositories", "role");
 const UserRoleRepository = appRequire("repositories", "user_role");
 const TokenRepository = appRequire("repositories", "token");
 const stringLib = appRequire("libs", "string");
+const imageLib = appRequire("libs", "image");
 const { sequelize } = appRequire("models");
 
 exports.register = async (req, res, next) => {
@@ -44,6 +45,13 @@ exports.register = async (req, res, next) => {
       throw new ValidationError("Validation Error", errorRoles.map(v => {
         return { param: "role" , msg: `Invalid Role ${v}`, value: v };
       }));
+    }
+
+    // upload files
+    if (req.files.length) {
+      let uploadFile = await moveUploadedFile(req.files, "image", "user/" + userData.username, "image");
+      await imageLib.compressImage(uploadFile);
+      userData.image_path = uploadFile.dir + "/" + uploadFile.fullname;
     }
 
     const userRoleRepo = new UserRoleRepository(req);

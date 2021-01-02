@@ -16,10 +16,10 @@ module.exports = {
       password: await stringLib.generatePassword("123456"),
       fullname: "Admin",
     }];
-    await queryInterface.bulkInsert('user', userData);
+    await queryInterface.bulkInsert('users', userData);
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('user', {});
+    await queryInterface.bulkDelete('users', {});
   }
 };

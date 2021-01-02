@@ -14,7 +14,7 @@ module.exports = {
         allowNull: false,
         references: {
           model: {
-            tableName: 'user',
+            tableName: 'users',
             key: 'id',
           },
         },
@@ -43,8 +43,8 @@ module.exports = {
         type: Sequelize.DATE,
       },
     }).then(() => {
-      queryInterface.addIndex('user_role', ['user_id'], { name: 'idx_user_id' });
-      queryInterface.addIndex('user_role', ['role_id'], { name: 'idx_role_id' });
+      queryInterface.addIndex('user_role', ['user_id'], { name: 'idx_user_user_id' });
+      queryInterface.addIndex('user_role', ['role_id'], { name: 'idx_user_role_id' });
     });
   },
 

@@ -1,7 +1,7 @@
 const appRoot = require('app-root-path');
 require("dotenv").config();
 
-const checkFalsyEnv = (value) => {
+const checkFalsyEnv = value => {
   if (value && value.toLowerCase() === 'false') {
     return false;
   }
@@ -12,6 +12,20 @@ module.exports = {
   version: process.env.VERSION,
   appName: process.env.APPNAME,
   rootPath: appRoot,
+  staticPath: ["/uploads", "/public"],
+  uploadDir: appRoot + "/uploads",
+  maxFileSize: 10 * 1024 * 1024, // 10 MB
+  allowedMimeType: [
+    "image/png",
+    "image/jpg",
+    "image/jpeg",
+    "image/gif",
+    "video/mp4",
+    "application/pdf",
+    "application/zip",
+    "application/rar",
+    // add another allowed file type
+  ],
   accessTokenLifeTime: process.env.ACCESS_TOKEN_LIFETIME,
   refreshTokenLifeTime: process.env.REFRESH_TOKEN_LIFETIME,
   db: {

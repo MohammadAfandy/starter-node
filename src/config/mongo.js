@@ -2,7 +2,6 @@ const { MongoClient } = require('mongodb');
 
 const { mongo } = appRequire("config");
 const logger = appRequire("config", "logger");
-
 class MongoConnect {
   constructor() {
     this.client = new MongoClient(mongo.uri, {

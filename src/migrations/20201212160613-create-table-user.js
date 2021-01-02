@@ -2,7 +2,7 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable('user', {
+    await queryInterface.createTable('users', {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
@@ -27,6 +27,9 @@ module.exports = {
       fullname: {
         type: Sequelize.STRING,
         allowNull: false,
+      },
+      image_path: {
+        type: Sequelize.STRING,
       },
       description: {
         type: Sequelize.STRING
@@ -56,15 +59,15 @@ module.exports = {
         type: Sequelize.DATE,
       },
     }).then(() => {
-      queryInterface.addIndex('user', ['username'], { name: 'idx_username' });
-      queryInterface.addIndex('user', ['email'], { name: 'idx_email' });
-      queryInterface.addIndex('user', ['phone_number'], { name: 'idx_phone_number' });
-      queryInterface.addIndex('user', ['status'], { name: 'idx_status' });
-      queryInterface.addIndex('user', ['created_at'], { name: 'idx_created_at' });
+      queryInterface.addIndex('users', ['username'], { name: 'idx_user_username' });
+      queryInterface.addIndex('users', ['email'], { name: 'idx_user_email' });
+      queryInterface.addIndex('users', ['phone_number'], { name: 'idx_user_phone_number' });
+      queryInterface.addIndex('users', ['status'], { name: 'idx_user_status' });
+      queryInterface.addIndex('users', ['created_at'], { name: 'idx_user_created_at' });
     });
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable('user');
+    await queryInterface.dropTable('users');
   }
 };

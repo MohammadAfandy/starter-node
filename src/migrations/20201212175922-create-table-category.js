@@ -37,8 +37,8 @@ module.exports = {
         type: Sequelize.DATE,
       },
     }).then(() => {
-      queryInterface.addIndex('category', ['code'], { name: 'idx_code' });
-      queryInterface.addIndex('category', ['name'], { name: 'idx_name' });
+      queryInterface.addIndex('category', ['code'], { name: 'idx_category_code' });
+      queryInterface.addIndex('category', ['name'], { name: 'idx_category_name' });
     });
   },
 

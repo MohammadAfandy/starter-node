@@ -50,9 +50,9 @@ module.exports = {
         type: Sequelize.DATE,
       },
     }).then(() => {
-      queryInterface.addIndex('product', ['code'], { name: 'idx_code' });
-      queryInterface.addIndex('product', ['name'], { name: 'idx_name' });
-      queryInterface.addIndex('product', ['status'], { name: 'idx_status' });
+      queryInterface.addIndex('product', ['code'], { name: 'idx_product_code' });
+      queryInterface.addIndex('product', ['name'], { name: 'idx_product_name' });
+      queryInterface.addIndex('product', ['status'], { name: 'idx_product_status' });
     });
   },
 

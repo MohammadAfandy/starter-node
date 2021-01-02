@@ -1,6 +1,6 @@
 const tokenRepository = appRequire("repositories", "token");
 
-const authenticate = async (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
   try {
     let { "access-token": accessToken } = req.headers;
     if (!accessToken) throw new UnauthorizedError("Access Token Required");
@@ -36,4 +36,4 @@ const authenticate = async (req, res, next) => {
   }
 }
 
-module.exports = authenticate
+module.exports = authMiddleware

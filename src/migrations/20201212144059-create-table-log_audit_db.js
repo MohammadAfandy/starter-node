@@ -34,9 +34,9 @@ module.exports = {
         defaultValue: Sequelize.NOW,
       },
     }).then(() => {
-      queryInterface.addIndex('log_audit_db', ['table'], { name: 'idx_table' });
-      queryInterface.addIndex('log_audit_db', ['action'], { name: 'idx_action' });
-      queryInterface.addIndex('log_audit_db', ['timestamp'], { name: 'idx_timestamp' });
+      queryInterface.addIndex('log_audit_db', ['table'], { name: 'idx_log_audit_db_table' });
+      queryInterface.addIndex('log_audit_db', ['action'], { name: 'idx_log_audit_db_action' });
+      queryInterface.addIndex('log_audit_db', ['timestamp'], { name: 'idx_log_audit_db_timestamp' });
     });
   },
 

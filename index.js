@@ -3,10 +3,10 @@ const app = express();
 const cors = require("cors");
 const helmet = require("helmet");
 const bodyParser = require("body-parser");
-const { port } = require("./src/config");
+const { rootPath, staticPath, port } = require("./src/config");
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 app.use(helmet());
 
@@ -16,8 +16,14 @@ Object.assign(global, require("./src/utils/functions"));
 // add custom error exception
 Object.assign(global, require("./src/utils/error"));
 
-// add custom express response function
-require("./src/utils/response")(app);
+// static path
+for (let i in staticPath) {
+  app.use(staticPath[i], express.static(rootPath + staticPath[i]));
+}
+
+// add custom global middlewares
+const middlewares = require("./src/middlewares");
+if (middlewares.length) app.use(...middlewares);
 
 // main routes
 app.use("/api", require("./src/routes"))

@@ -7,7 +7,7 @@ module.exports = (sequelize, Sequelize) => {
       allowNull: false,
     },
     code: {
-      type: Sequelize.INTEGER(3),
+      type: Sequelize.INTEGER,
       allowNull: false,
     },
     path: {
@@ -26,6 +26,9 @@ module.exports = (sequelize, Sequelize) => {
     },
     response: {
       type: Sequelize.TEXT,
+    },
+    ip_address: {
+      type: Sequelize.STRING(30),
     },
     timestamp: {
       type: Sequelize.DATE,
