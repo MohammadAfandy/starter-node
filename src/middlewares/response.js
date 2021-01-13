@@ -46,7 +46,7 @@ const response = async (req, res, next) => {
 
   const sendResponse = response => {
     if (logging.request) logRequest(response.code, req, response);
-    res.status(response.code).json(response);
+    return res.status(response.code).json(response);
   }
 
   let response = {
@@ -85,8 +85,13 @@ const response = async (req, res, next) => {
       response.message = message || err.message || "Internal Server Error";
       response.error = error || err.data || {};
 
-      // Don't show 500 error message on production
-      if (response.code === 500 && !config.debug) response.message = "Internal Server Error";
+      if (config.debug) {
+        response.stack = err.stack;
+      } else {
+        if (response.code >= 500) {
+          response.message = "Internal Server Error";
+        }
+      }
     }
 
     if (response.code >= 400 && response.code < 500) {

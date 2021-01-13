@@ -1,29 +1,21 @@
 const express = require("express");
 const app = express();
-const cors = require("cors");
-const helmet = require("helmet");
-const bodyParser = require("body-parser");
 const { rootPath, staticPath, port } = require("./src/config");
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors());
-app.use(helmet());
 
 // add custom global function
 Object.assign(global, require("./src/utils/functions"));
 
 // add custom error exception
-Object.assign(global, require("./src/utils/error"));
+Object.assign(global, appRequire("utils", "error"));
+
+// add global middlewares
+const middlewares = appRequire("middlewares");
+if (middlewares.length) app.use(...middlewares);
 
 // static path
 for (let i in staticPath) {
   app.use(staticPath[i], express.static(rootPath + staticPath[i]));
 }
-
-// add custom global middlewares
-const middlewares = require("./src/middlewares");
-if (middlewares.length) app.use(...middlewares);
 
 // main routes
 app.use("/api", require("./src/routes"))

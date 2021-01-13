@@ -1,10 +1,17 @@
+const helmet = require("helmet");
+const bodyParser = require("body-parser");
+const responseMiddleware = appRequire("middlewares", "response");
+const corsMiddleware = appRequire("middlewares", "cors");
 const trimMiddleware = appRequire("middlewares", "trim");
 const multerMiddleware = appRequire("middlewares", "multer");
-const responseMiddleware = appRequire("middlewares", "response");
 
 module.exports = [
   responseMiddleware,
-  multerMiddleware,
+  corsMiddleware,
+  helmet(),
+  bodyParser.json(),
+  bodyParser.urlencoded({ extended: true }),
   trimMiddleware,
-  // ... add more global middleware function
+  multerMiddleware,
+  // ... add more middleware function
 ];

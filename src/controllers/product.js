@@ -1,9 +1,26 @@
 const ProductRepository = appRequire("repositories", "product");
+const tableLib = appRequire("libs", "table");
 
 exports.index = async (req, res, next) => {
   try {
-    const product = new ProductRepository(req);
-    let data = await product.findAll();
+    const columns = [
+      ['p.id', 'id'],
+      ['p.code', 'code'],
+      ['p.name', 'name'],
+      ['c.name', 'category'],
+      ['p.description', 'description'],
+      ['p.created_at', 'created_at'],
+    ];
+    const query =  `
+      SELECT {{columns}}
+      FROM product p
+      LEFT JOIN category c ON p.category_id = c.id
+      WHERE p.deleted_at IS NULL
+    `;
+    const { q: search, page, limit, sort } = req.query; 
+    const data = await tableLib.generatePagination({
+      req, query, search, page, limit, sort, columns
+    })
     res.success(data);
   } catch (error) {
     next(error);

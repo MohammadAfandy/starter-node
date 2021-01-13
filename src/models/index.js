@@ -33,6 +33,18 @@ const sequelize = new Sequelize(dbConfig.dbName, dbConfig.username, dbConfig.pas
   define: defaultOptions,
 });
 
+// https://github.com/sequelize/sequelize/issues/9481
+// sequelize.addHook('beforeCount', function (options) {
+//   if (this._scope.include && this._scope.include.length > 0) {
+//     options.distinct = true
+//     options.col = this._scope.col || options.col || `"${this.options.name.singular}".id`
+//   }
+
+//   if (options.include && options.include.length > 0) {
+//     options.include = null
+//   }
+// });
+
 const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;;
@@ -52,7 +64,7 @@ if (logging.auditDb) {
 
 // ========================== MODEL ASSIGNMENT ==========================
 
-// list of model that doesn't use default options
+// list of model that doesn't use additional options
 db.log_audit_db = appRequire("models", "log_audit_db")(sequelize, Sequelize);
 db.log_request = appRequire("models", "log_request")(sequelize, Sequelize);
 

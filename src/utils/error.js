@@ -39,7 +39,7 @@ class ValidationError extends Error {
     super();
     this.status_code = 422;
     this.message = message || "Validation Error";
-    this.data = errData || {};
+    this.data = errData || [];
   }
 }
 

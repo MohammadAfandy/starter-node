@@ -1,18 +1,23 @@
 const CategoryRepository = appRequire("repositories", "category");
+const tableLib = appRequire("libs", "table");
 
 exports.index = async (req, res, next) => {
   try {
-    const category = new CategoryRepository(req);
-    let params = req.params;
-    if (params.product && params.product !== "product") {
-      throw new BadRequestError(`Resource ${params.product} Not Valid`);
-    }
-
-    let data = await category.findAll({
-      relations: params.product && [{
-        model: params.product,
-        attributes: ["id", "code", "name"],
-      }]
+    const columns = [
+      'id',
+      'code',
+      'name',
+      'description',
+      'created_at',
+    ];
+    const query =  `
+      SELECT {{columns}}
+      FROM category u
+      WHERE deleted_at IS NULL
+    `;
+    const { q: search, page, limit, sort } = req.query; 
+    const data = await tableLib.generatePagination({
+      req, query, search, page, limit, sort, columns
     });
     res.success(data);
   } catch (error) {
@@ -40,7 +45,7 @@ exports.findOne = async (req, res, next) => {
   
     let data = await category.findOne({
       where: { id: params.id },
-      relations: params.product && [{
+      include: params.product && [{
         model: params.product,
         attributes: ["id", "code", "name"],
       }]

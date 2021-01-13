@@ -1,10 +1,9 @@
 const BaseRepository = appRequire("repositories");
-const { user: model } = appRequire("models");
 const { Op } = require("sequelize"); 
 
 class UserRepository extends BaseRepository {
   constructor(request) {
-    super(model, request);
+    super(request, "user");
   }
 
   async findCredential(credential) {
@@ -14,7 +13,10 @@ class UserRepository extends BaseRepository {
           { username: credential },
           { email: credential },
         ],
-      }
+      },
+      include: [{
+        model: 'role',
+      }]
     });
 
     return data;

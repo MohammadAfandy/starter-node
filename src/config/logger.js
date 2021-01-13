@@ -12,6 +12,8 @@ const errorFormat = winston.format(info => {
     info = { ...info, message: info.message, stack: info.stack }
   }
 
+  info.message = isString(info.message) ? info.message.replace(/\n/g, " ") : "";
+
   return info;
 });
 

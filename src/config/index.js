@@ -8,10 +8,19 @@ const checkFalsyEnv = value => {
   return true;
 }
 
+const handleArrayEnv = value => {
+  return value.slice(1,-1)
+          .trim()
+          .split(",")
+          .map(v => v.trim());
+}
+
 module.exports = {
   version: process.env.VERSION,
   appName: process.env.APPNAME,
+  baseUrl: process.env.BASE_URL,
   rootPath: appRoot,
+  allowedOrigin: handleArrayEnv(process.env.ALLOWED_ORIGIN),
   staticPath: ["/uploads", "/public"],
   uploadDir: appRoot + "/uploads",
   maxFileSize: 10 * 1024 * 1024, // 10 MB

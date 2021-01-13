@@ -15,7 +15,7 @@ exports.compressImage = async (file, options = {}) => {
       compress,
     };
   } catch(error) {
-    throw new Error(error.stack);
+    throw new Error(error);
   }
 }
 

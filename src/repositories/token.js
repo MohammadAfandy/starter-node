@@ -1,12 +1,11 @@
 const moment = require("moment");
 const BaseRepository = appRequire("repositories");
-const { token: model } = appRequire("models");
 const { accessTokenLifeTime, refreshTokenLifeTime } = appRequire("config");
 const stringLib = appRequire("libs", "string");
 
 class TokenRepository extends BaseRepository {
   constructor(request) {
-    super(model, request);
+    super(request, "token");
   }
 
   async checkExist(accessToken, refreshToken) {
@@ -23,9 +22,9 @@ class TokenRepository extends BaseRepository {
     let token = {};
 
     do {
-      token.accessToken = stringLib.generateToken();
+      token.accessToken = stringLib.randomString();
       if (withRefresh) {
-        token.refreshToken = stringLib.generateToken();
+        token.refreshToken = stringLib.randomString();
       }
     } while (await this.checkExist(token.accessToken, token.refreshToken));
 
@@ -49,17 +48,20 @@ class TokenRepository extends BaseRepository {
     return tokenData;
   }
 
-  async updateToken(userId, device) {
+  async updateToken(accessToken, refreshToken) {
     let token = await this.findOne({
-      where: { user_id: userId, device: device || null },
+      where: { access_token: accessToken, refresh_token: refreshToken },
     });
     if (!token) throw new NotFoundError("User with this device Not Found.");
-    let { accessToken, refreshToken } = await this.generateToken();
+    let {
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+    } = await this.generateToken();
 
     let now = new Date();
     let tokenData = {
-      access_token: accessToken,
-      refresh_token: refreshToken,
+      access_token: newAccessToken,
+      refresh_token: newRefreshToken,
       access_token_expired_at: moment(now).add(accessTokenLifeTime, "seconds").toDate(),
       refresh_token_expired_at: moment(now).add(refreshTokenLifeTime, "seconds").toDate(),
     };
@@ -101,11 +103,11 @@ class TokenRepository extends BaseRepository {
     return token;
   }
 
-  async deleteToken(userId, device) {
+  async deleteToken(accessToken) {
     let token = await this.findOne({
-      where: { user_id: userId, device: device || null },
+      where: { access_token: accessToken },
     });
-    if (!token) throw new NotFoundError("User with this device Not Found.");
+    if (!token) throw new NotFoundError("Access Token Not Found.");
     await token.destroy();
 
     return token;

@@ -1,3 +1,5 @@
+const { baseUrl } = appRequire("config");
+
 module.exports = (sequelize, Sequelize, options) => {
   const model = sequelize.define("users", {
     id: {
@@ -59,6 +61,7 @@ module.exports = (sequelize, Sequelize, options) => {
 
   model.prototype.toJSON = function () {
     let values = Object.assign({}, this.get());
+    values.image_path = values.image_path && (baseUrl + "/uploads/" + values.image_path);
     delete values.password;
     return values;
   };

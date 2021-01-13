@@ -9,13 +9,13 @@ const authMiddleware = async (req, res, next) => {
     const tokenRepo = new tokenRepository(req);
     let token = await tokenRepo.findOne({
       where: { access_token: accessToken },
-      relations: [{
+      include: [{
         model: "user",
         attributes: ["username", "email", "phone_number", "fullname"],
         required: true,
       }]
     });
-    
+
     if (!token) throw new UnauthorizedError("Invalid Access Token");
     if (token.access_token_expired_at < now) throw new UnauthorizedError("Access Token Already Expired");
   

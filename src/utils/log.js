@@ -27,13 +27,14 @@ const logAuditDb = async (instance, action) => {
 
 const logRequest = async (code, request, response) => {
   let process;
+  let canParse = (isObject(response) || isArray(response));
   let dataLog = {
     code: code,
     path: request.originalUrl,
     method: request.method,
     header: request.headers,
     body: request.body,
-    response: response,
+    response: canParse ? JSON.parse((JSON.stringify(response))) : {},
     ip_address: getIpAddress(request),
     timestamp: new Date(),
   };

@@ -9,12 +9,14 @@ module.exports = {
       phone_number: "081212121211",
       password: await stringLib.generatePassword("123456"),
       fullname: "Super Admin",
+      created_at: new Date(),
     }, {
       username: "admin",
       email: "admin@testemail.com",
       phone_number: "081212121212",
       password: await stringLib.generatePassword("123456"),
       fullname: "Admin",
+      created_at: new Date(),
     }];
     await queryInterface.bulkInsert('users', userData);
   },

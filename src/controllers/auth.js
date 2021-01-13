@@ -5,6 +5,7 @@ const TokenRepository = appRequire("repositories", "token");
 const stringLib = appRequire("libs", "string");
 const imageLib = appRequire("libs", "image");
 const { sequelize } = appRequire("models");
+const { baseUrl } = appRequire("config");
 
 exports.register = async (req, res, next) => {
   try {
@@ -26,7 +27,7 @@ exports.register = async (req, res, next) => {
 
     if (checkDuplicate.length) {
       throw new ValidationError("Validation Error", checkDuplicate.map(v => {
-        return { param: v , msg: `${v} already taken`, value: userData[v] };
+        return { param: v , msg: `${stringLib.ucfirst(v, "_")} already taken`, value: userData[v] };
       }));
     }
 
@@ -48,7 +49,7 @@ exports.register = async (req, res, next) => {
     }
 
     // upload files
-    if (req.files.length) {
+    if (req.files && req.files.length) {
       let uploadFile = await moveUploadedFile(req.files, "image", "user/" + userData.username, "image");
       await imageLib.compressImage(uploadFile);
       userData.image_path = uploadFile.dir + "/" + uploadFile.fullname;
@@ -78,9 +79,9 @@ exports.login = async (req, res, next) => {
     
     // ==================== Start User Validation ====================
     let userData = await user.findCredential(credential);
-    if (!userData) throw new NotFoundError("Username / Email Not Found");
-    if (userData.status === "INACTIVE") throw new UnauthorizedError("User Hast Not Been Activated Yet");
-    if (userData.status === "BANNED") throw new UnauthorizedError("User Has Been Banned");
+    if (!userData) throw new NotFoundError("Username / Email not found");
+    if (userData.status === "INACTIVE") throw new UnauthorizedError("User has not been activated yet");
+    if (userData.status === "BANNED") throw new UnauthorizedError("User has been banned");
 
     let checkPass = await stringLib.checkPasswordValid(password, userData.password);
     if (!checkPass) throw new UnauthorizedError("Wrong Password");
@@ -99,7 +100,7 @@ exports.login = async (req, res, next) => {
     if (checkToken) { // token already exist
       if (checkToken.access_token_expired_at < now) { // access token is expired
         if (checkToken.refresh_token_expired_at < now) { // refresh token is expired
-          tokenData = await tokenRepo.updateToken(userData.id, device); // update access and refresh token
+          tokenData = await tokenRepo.updateToken(checkToken.access_token, checkToken.refresh_token); // update access and refresh token
         } else { // access token expired but refresh token still active
           tokenData = await tokenRepo.refreshToken(checkToken.access_token, checkToken.refresh_token); // only update access token
         }
@@ -114,10 +115,14 @@ exports.login = async (req, res, next) => {
       tokenData = await tokenRepo.createToken(userData.id, device);
     }
     // ==================== End Token Generation Process ====================
-    
+
     res.success({
       username: userData.username,
       email: userData.email,
+      phone_number: userData.phone_number,
+      fullname: userData.fullname,
+      roles: userData.roles.map(v => v.role_name),
+      image_path: baseUrl + '/uploads/' + userData.image_path,
       access_token: tokenData.access_token,
       refresh_token: tokenData.refresh_token,
       device: tokenData.device,
@@ -149,7 +154,7 @@ exports.refresh = async (req, res, next) => {
 exports.logout = async (req, res, next) => {
   try {
     const tokenRepo = new TokenRepository(req);
-    await tokenRepo.deleteToken(req.user.id, req.token.device);
+    await tokenRepo.deleteToken(req.token.accessToken);
     res.success({}, "Logout Success");
   } catch (error) {
     next(error)

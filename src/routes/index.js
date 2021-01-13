@@ -6,6 +6,7 @@ const authMiddleware = appRequire("middlewares", "auth");
 router.use("/auth", appRequire("routes", "auth"));
 router.use("/category", authMiddleware, appRequire("routes", "category"));
 router.use("/product", authMiddleware, appRequire("routes", "product"));
+router.use("/user", authMiddleware, appRequire("routes", "user"));
 
 // use controller
 router.get("/", appRequire("controllers", "version").index);
