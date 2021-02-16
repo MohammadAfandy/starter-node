@@ -68,7 +68,10 @@ class TokenRepository extends BaseRepository {
 
     await this.update({
       data: tokenData,
-      where: { user_id: userId, device: device || null },
+      where: {
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      },
     });
 
     return token;
