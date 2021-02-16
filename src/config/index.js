@@ -9,10 +9,12 @@ const checkFalsyEnv = value => {
 }
 
 const handleArrayEnv = value => {
-  return value.slice(1,-1)
+  return (
+    value && value.slice(1,-1)
           .trim()
           .split(",")
-          .map(v => v.trim());
+          .map(v => v.trim())
+  );
 }
 
 module.exports = {
