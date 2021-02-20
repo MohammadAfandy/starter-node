@@ -8,6 +8,7 @@ exports.index = async (req, res, next) => {
       ['p.code', 'code'],
       ['p.name', 'name'],
       ['c.name', 'category'],
+      ['c.id', 'category_id'],
       ['p.description', 'description'],
       ['p.created_at', 'created_at'],
     ];
@@ -55,7 +56,7 @@ exports.update = async (req, res, next) => {
     let data = await product.findByPk({ id: req.params.id });
     if (!data) throw new NotFoundError("product Not Found")
 
-    Object.assign(data, req.body)
+    data = Object.assign(data.dataValues, req.body);
     await product.update({ data, where: { id: data.id } })
     res.success(data);
   } catch (error) {

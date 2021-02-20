@@ -23,6 +23,7 @@ exports.index = async (req, res, next) => {
       ['u.id', 'id'],
       ['u.fullname', 'fullname'],
       ['u.username', 'username'],
+      ['GROUP_CONCAT(r.id)', 'role_id'],
       ['GROUP_CONCAT(r.role_name)', 'role_name'],
       ['u.email', 'email'],
       ['u.phone_number', 'phone_number'],
@@ -71,9 +72,12 @@ exports.update = async (req, res, next) => {
   try {
     const user = new UserRepository(req);
     let data = await user.findByPk({ id: req.params.id });
-    if (!data) throw new NotFoundError("user Not Found")
+    if (!data) throw new NotFoundError("user Not Found");
 
-    Object.assign(data, req.body)
+    // validation
+    await user.validate(req.body, data);
+
+    data = Object.assign(data.dataValues, req.body);
     await user.update({ data, where: { id: data.id } })
     res.success(data);
   } catch (error) {

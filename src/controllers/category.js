@@ -63,7 +63,7 @@ exports.update = async (req, res, next) => {
     let data = await category.findByPk({ id: req.params.id });
     if (!data) throw new NotFoundError("Category Not Found")
 
-    Object.assign(data, req.body)
+    data = Object.assign(data.dataValues, req.body);
     await category.update({ data, where: { id: data.id } })
     res.success(data);
   } catch (error) {

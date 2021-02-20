@@ -19,18 +19,9 @@ exports.register = async (req, res, next) => {
     }
     const userRepo = new UserRepository(req);
 
-    let checkDuplicate = await userRepo.checkDuplicate({
-      username: userData.username,
-      email: userData.email,
-      phone_number: userData.phone_number,
-    });
-
-    if (checkDuplicate.length) {
-      throw new ValidationError("Validation Error", checkDuplicate.map(v => {
-        return { param: v , msg: `${stringLib.ucfirst(v, "_")} already taken`, value: userData[v] };
-      }));
-    }
-
+    // validation
+    await userRepo.validate(req.body);
+  
     const roleRepo = new RoleRepository(req);
     let promisesRole = [];
     for (let i in userData.role) {
