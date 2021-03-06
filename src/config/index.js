@@ -22,7 +22,6 @@ module.exports = {
   appName: process.env.APPNAME,
   baseUrl: process.env.BASE_URL,
   rootPath: appRoot,
-  allowedOrigin: handleArrayEnv(process.env.ALLOWED_ORIGIN),
   staticPath: ["/uploads", "/public"],
   uploadDir: appRoot + "/uploads",
   maxFileSize: 10 * 1024 * 1024, // 10 MB

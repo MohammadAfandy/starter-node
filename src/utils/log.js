@@ -7,22 +7,26 @@ if (mongo.enable) {
   mongoConnection.init();
 }
 
-const logAuditDb = async (instance, action) => {
-  let process;
-  let primaryKey = instance.constructor.primaryKeyAttributes[0];
-  let dataLog = {
-    table: instance.constructor.getTableName(),
-    action: action,
-    primary_field: primaryKey,
-    primary_value: instance[primaryKey],
-    previous_data: instance._previousDataValues,
-    data: instance.dataValues,
-    timestamp: new Date(),
-  };
+const logAuditDb = async (instances, action) => {
+  if (!isArray(instances)) {
+    instances = [instances];
+  }
+  for (let instance of instances) {
+    let primaryKey = instance.constructor.primaryKeyAttributes[0];
+    let dataLog = {
+      table: instance.constructor.getTableName(),
+      action: action,
+      primary_field: primaryKey,
+      primary_value: instance[primaryKey],
+      previous_data: instance._previousDataValues,
+      data: instance.dataValues,
+      timestamp: new Date(),
+    };
+  
+    await insertLog("log_audit_db", dataLog, instance);
+  }
 
-  process = await insertLog("log_audit_db", dataLog, instance);
-
-  return process;
+  return true;
 }
 
 const logRequest = async (code, request, response) => {

@@ -1,5 +1,11 @@
+const BaseModel = appRequire("models", "base");
+
 module.exports = (sequelize, Sequelize, options) => {
-  const model = sequelize.define("product", {
+  class Product extends BaseModel {
+
+  }
+
+  Product.init({
     id: {
       type: Sequelize.INTEGER,
       primaryKey: true,
@@ -20,27 +26,27 @@ module.exports = (sequelize, Sequelize, options) => {
     category_id: {
       type: Sequelize.INTEGER,
     },
-    status: {
-      type: Sequelize.ENUM("ACTIVE", "INACTIVE"),
-      defaultValue: "ACTIVE",
-    },
-    deleted_at: {
-      type: Sequelize.DATE,
-    },
+    // deleted_at: {
+    //   type: Sequelize.DATE,
+    // },
     created_by: {
       type: Sequelize.INTEGER
     },
-    created_at: {
-      type: Sequelize.DATE,
-      defaultValue: Sequelize.NOW,
-    },
+    // created_at: {
+    //   type: Sequelize.DATE,
+    //   defaultValue: Sequelize.NOW,
+    // },
     updated_by: {
       type: Sequelize.INTEGER
     },
-    updated_at: {
-      type: Sequelize.DATE,
-    },
-  }, { ...options });
+    // updated_at: {
+    //   type: Sequelize.DATE,
+    // },
+  }, {
+    sequelize,
+    modelName: 'product',
+    ...options,
+  });
 
-  return model;
+  return Product;
 };

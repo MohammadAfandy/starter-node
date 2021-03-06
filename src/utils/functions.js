@@ -1,12 +1,12 @@
 const { rootPath, uploadDir } = require("../config");
 const fs = require("fs");
 const moment = require("moment");
+const listEndpoints = require('express-list-endpoints');
 
-const appRequire = (moduleName, fileName = "index") => {
+const appRequire = (moduleName, ...filePath) => {
   const availableModules = [
     "config",
     "controllers",
-    "libs",
     "middlewares",
     "models",
     "repositories",
@@ -17,24 +17,16 @@ const appRequire = (moduleName, fileName = "index") => {
   ];
   if (availableModules.indexOf(moduleName) <= -1) throw new Error(`Module '${moduleName}' not available`);
 
-  let path = `${rootPath}/src/${moduleName}/${fileName}`;
-
-  if (fileName.substring(fileName.length - 3) !== ".js") {
-    path += ".js";
-  }
-
-  if (!fs.existsSync(path)) {
-    throw new Error(`Module '${moduleName}' with file '${fileName}' not fouund`);
-  }
+  let path = `${rootPath}/src/${moduleName}/${filePath.join('/')}`;
 
   return require(path);
 }
 
-const isString = string => typeof string === "string";
+const isString = (string) => typeof string === "string";
 
-const isArray = array => Array.isArray(array)
+const isArray = (array) => Array.isArray(array)
 
-const isObject = object => Object.prototype.toString.call(object) === "[object Object]";
+const isObject = (object) => Object.prototype.toString.call(object) === "[object Object]";
 
 const getIpAddress = (req) => {
   let ip = req.headers["x-forwarded-for"];
@@ -45,7 +37,7 @@ const getIpAddress = (req) => {
   return ip || null;
 }
 
-const makeDir = dir => {
+const makeDir = (dir) => {
   let process;
   if (!fs.existsSync(dir)) {
     process = fs.mkdirSync(dir, { recursive: true })
@@ -101,6 +93,26 @@ const moveUploadedFile = (files, fieldName, destination, newFileName, withTimeSt
   }
 )};
 
+const fancyLog = (log) => {
+  console.log('\x1b[35m%s\x1b[0m', '=========================================================================================');
+  console.log(Object.keys({log})[0] + ' ==> ', log);
+  console.log('\x1b[35m%s\x1b[0m', '=========================================================================================');
+}
+
+const getAllRoutes = () => {
+  const routes = listEndpoints(APP);
+  let res = [];
+  for (let route of routes) {
+    for (let method of route.methods) {
+      res.push({
+        route: route.path,
+        method,
+      })
+    }
+  }
+  return res;
+}
+
 exports.appRequire = appRequire;
 exports.isString = isString;
 exports.isArray = isArray;
@@ -108,3 +120,5 @@ exports.isObject = isObject;
 exports.getIpAddress = getIpAddress;
 exports.makeDir = makeDir;
 exports.moveUploadedFile = moveUploadedFile;
+exports.fancyLog = fancyLog;
+exports.getAllRoutes = getAllRoutes;

@@ -42,28 +42,24 @@ module.exports = {
         type: Sequelize.DATE,
         defaultValue: Sequelize.NOW,
       },
-      deleted_at: {
-        type: Sequelize.DATE,
-      },
       created_by: {
         type: Sequelize.INTEGER
-      },
-      created_at: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW,
       },
       updated_by: {
         type: Sequelize.INTEGER
       },
-      updated_at: {
-        type: Sequelize.DATE,
-      },
+  
+      // Timestamps
+      created_at: Sequelize.DATE,
+      updated_at: Sequelize.DATE,
+      deleted_at: Sequelize.DATE,
     }).then(() => {
       queryInterface.addIndex('users', ['username'], { name: 'idx_user_username' });
       queryInterface.addIndex('users', ['email'], { name: 'idx_user_email' });
       queryInterface.addIndex('users', ['phone_number'], { name: 'idx_user_phone_number' });
       queryInterface.addIndex('users', ['status'], { name: 'idx_user_status' });
       queryInterface.addIndex('users', ['created_at'], { name: 'idx_user_created_at' });
+      queryInterface.addIndex('users', ['deleted_at'], { name: 'idx_user_deleted_at' });
     });
   },
 

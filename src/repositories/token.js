@@ -1,7 +1,7 @@
 const moment = require("moment");
 const BaseRepository = appRequire("repositories");
 const { accessTokenLifeTime, refreshTokenLifeTime } = appRequire("config");
-const stringLib = appRequire("libs", "string");
+const helper = appRequire("utils", "helpers");
 
 class TokenRepository extends BaseRepository {
   constructor(request) {
@@ -22,9 +22,9 @@ class TokenRepository extends BaseRepository {
     let token = {};
 
     do {
-      token.accessToken = stringLib.randomString();
+      token.accessToken = helper.encrypt.randomString();
       if (withRefresh) {
-        token.refreshToken = stringLib.randomString();
+        token.refreshToken = helper.encrypt.randomString();
       }
     } while (await this.checkExist(token.accessToken, token.refreshToken));
 
@@ -74,14 +74,13 @@ class TokenRepository extends BaseRepository {
       },
     });
 
-    return token;
+    return tokenData;
   }
 
-  async refreshToken(oldAccessToken, refreshToken) {
+  async refreshToken(refreshToken) {
     let now = new Date();
     let token = await this.findOne({
       where: {
-        access_token: oldAccessToken,
         refresh_token: refreshToken,
       },
     });
@@ -98,12 +97,14 @@ class TokenRepository extends BaseRepository {
     await this.update({
       data: tokenData,
       where: {
-        access_token: oldAccessToken,
         refresh_token: refreshToken,
       },
     });
 
-    return token;
+    return {
+      ...token.dataValues,
+      ...tokenData,
+    };
   }
 
   async deleteToken(accessToken) {
@@ -117,4 +118,6 @@ class TokenRepository extends BaseRepository {
   }
 }
 
-module.exports = TokenRepository;
+module.exports = (req) => {
+  return (new TokenRepository(req));
+};

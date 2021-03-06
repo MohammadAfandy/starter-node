@@ -1,24 +1,9 @@
-const CategoryRepository = appRequire("repositories", "category");
-const tableLib = appRequire("libs", "table");
+const categoryRepo = appRequire("repositories", "category");
 
 exports.index = async (req, res, next) => {
   try {
-    const columns = [
-      'id',
-      'code',
-      'name',
-      'description',
-      'created_at',
-    ];
-    const query =  `
-      SELECT {{columns}}
-      FROM category u
-      WHERE deleted_at IS NULL
-    `;
-    const { q: search, page, limit, sort } = req.query; 
-    const data = await tableLib.generatePagination({
-      req, query, search, page, limit, sort, columns
-    });
+    const { q: search, page, limit, sort } = req.query;
+    const data = await categoryRepo(req).getAll({ search, page, limit, sort });
     res.success(data);
   } catch (error) {
     next(error);
@@ -27,8 +12,7 @@ exports.index = async (req, res, next) => {
 
 exports.store = async (req, res, next) => {
   try {
-    const category = new CategoryRepository(req);
-    let data = await category.create({ data: req.body });
+    let data = await categoryRepo(req).create({ data: req.body });
     res.success(data);
   } catch (error) {
     next(error)
@@ -37,19 +21,17 @@ exports.store = async (req, res, next) => {
 
 exports.findOne = async (req, res, next) => {
   try {
-    const category = new CategoryRepository(req);
-    let params = req.params;
-    if (params.product && params.product !== "product") {
-      throw new BadRequestError(`Resource ${params.product} Not Valid`);
+    let { id, relation } = req.params;
+    if (relation && relation.toLowerCase() !== 'product') {
+      throw new BadRequestError("Invalid Param " + relation)
+    };
+
+    let data;
+    if (relation) {
+      data = await categoryRepo(req).getCategoryWithProduct({ id });
+    } else {
+      data = await categoryRepo(req).findOne({ where: {id} });
     }
-  
-    let data = await category.findOne({
-      where: { id: params.id },
-      include: params.product && [{
-        model: params.product,
-        attributes: ["id", "code", "name"],
-      }]
-    });
     if (!data) throw new NotFoundError("Category Not Found")
     res.success(data);
   } catch (error) {
@@ -59,13 +41,12 @@ exports.findOne = async (req, res, next) => {
 
 exports.update = async (req, res, next) => {
   try {
-    const category = new CategoryRepository(req);
-    let data = await category.findByPk({ id: req.params.id });
-    if (!data) throw new NotFoundError("Category Not Found")
-
-    data = Object.assign(data.dataValues, req.body);
-    await category.update({ data, where: { id: data.id } })
-    res.success(data);
+    const { code, description, name } = req.body;
+    const process = await categoryRepo(req).firstAndUpdate({
+      where: { id: req.params.id },
+      data: { code, description, name }
+    });
+    res.success(process);
   } catch (error) {
     next(error);
   }
@@ -73,12 +54,8 @@ exports.update = async (req, res, next) => {
 
 exports.destroy = async (req, res, next) => {
   try {
-    const category = new CategoryRepository(req);
-    let data = await category.findByPk({ id: req.params.id });
-    if (!data) throw new NotFoundError("Category Not Found");
-
-    await category.softDelete({ where: { id: data.id } });
-    res.success(data);
+    const process = await categoryRepo(req).firstAndDestroy({ where: { id: req.params.id } });
+    res.success(process);
   } catch (error) {
     next(error);
   }

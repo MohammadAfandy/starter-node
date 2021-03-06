@@ -23,12 +23,6 @@ module.exports = {
       user_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
-        references: {
-          model: {
-            tableName: 'users',
-            key: 'id',
-          },
-        },
       },
       description: {
         type: Sequelize.STRING
@@ -42,16 +36,13 @@ module.exports = {
       created_by: {
         type: Sequelize.INTEGER
       },
-      created_at: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW,
-      },
       updated_by: {
         type: Sequelize.INTEGER
       },
-      updated_at: {
-        type: Sequelize.DATE,
-      },
+
+      // Timestamps
+      created_at: Sequelize.DATE,
+      updated_at: Sequelize.DATE,
     }).then(() => {
       queryInterface.addIndex('token', ['access_token'], { name: 'idx_token_access_token' });
       queryInterface.addIndex('token', ['refresh_token'], { name: 'idx_token_refresh_token' });
@@ -60,6 +51,15 @@ module.exports = {
       queryInterface.addIndex('token', ['created_at'], { name: 'idx_token_created_at' });
       queryInterface.addIndex('token', ['access_token_expired_at'], { name: 'idx_token_access_token_expired_at' });
       queryInterface.addIndex('token', ['refresh_token_expired_at'], { name: 'idx_token_refresh_token_expired_at' });
+      queryInterface.addConstraint('token', {
+        fields: ['user_id'],
+        type: 'foreign key',
+        name: 'fk_token_user_id',
+        references: {
+          table: 'users',
+          field: 'id'
+        },
+      });
     });
   },
 

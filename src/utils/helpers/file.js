@@ -1,6 +1,6 @@
 const sharp = require("sharp");
 
-exports.compressImage = async (file, options = {}) => {
+const compressImage = async (file, options = {}) => {
   try {
     let resize = {};
     resize.width = options.resize ? options.resize.width : 500;
@@ -19,3 +19,4 @@ exports.compressImage = async (file, options = {}) => {
   }
 }
 
+exports.compressImage = compressImage;

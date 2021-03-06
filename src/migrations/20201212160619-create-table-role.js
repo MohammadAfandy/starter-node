@@ -16,24 +16,22 @@ module.exports = {
       description: {
         type: Sequelize.STRING
       },
-      deleted_at: {
-        type: Sequelize.DATE,
-      },
       created_by: {
-        type: Sequelize.INTEGER
-      },
-      created_at: {
         type: Sequelize.DATE,
         defaultValue: Sequelize.NOW,
       },
       updated_by: {
         type: Sequelize.INTEGER
       },
-      updated_at: {
-        type: Sequelize.DATE,
-      },
+  
+      // Timestamps
+      created_at: Sequelize.DATE,
+      updated_at: Sequelize.DATE,
+      deleted_at: Sequelize.DATE,
     }).then(() => {
       queryInterface.addIndex('role', ['role_name'], { name: 'idx_role_role_name' });
+      queryInterface.addIndex('role', ['created_at'], { name: 'idx_role_created_at' });
+      queryInterface.addIndex('role', ['deleted_at'], { name: 'idx_role_deleted_at' });
     });
   },
 

@@ -22,37 +22,32 @@ module.exports = {
       },
       category_id: {
         type: Sequelize.INTEGER,
-        references: {
-          model: {
-            tableName: 'category',
-            key: 'id',
-          },
-        },
-      },
-      status: {
-        type: Sequelize.ENUM("ACTIVE", "INACTIVE"),
-        defaultValue: "ACTIVE",
-      },
-      deleted_at: {
-        type: Sequelize.DATE,
       },
       created_by: {
         type: Sequelize.INTEGER
       },
-      created_at: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.NOW,
-      },
       updated_by: {
         type: Sequelize.INTEGER
       },
-      updated_at: {
-        type: Sequelize.DATE,
-      },
+
+      // Timestamps
+      created_at: Sequelize.DATE,
+      updated_at: Sequelize.DATE,
+      deleted_at: Sequelize.DATE,
     }).then(() => {
       queryInterface.addIndex('product', ['code'], { name: 'idx_product_code' });
       queryInterface.addIndex('product', ['name'], { name: 'idx_product_name' });
-      queryInterface.addIndex('product', ['status'], { name: 'idx_product_status' });
+      queryInterface.addConstraint('product', {
+        fields: ['category_id'],
+        type: 'foreign key',
+        name: 'fk_product_category_id',
+        references: {
+          table: 'category',
+          field: 'id'
+        },
+      });
+      queryInterface.addIndex('product', ['created_at'], { name: 'idx_product_created_at' });
+      queryInterface.addIndex('product', ['deleted_at'], { name: 'idx_product_deleted_at' });
     });
   },
 

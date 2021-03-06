@@ -1,5 +1,11 @@
+const BaseModel = appRequire("models", "base");
+
 module.exports = (sequelize, Sequelize, options) => {
-  const model = sequelize.define("user_role", {
+  class UserRole extends BaseModel {
+
+  }
+
+  UserRole.init({
     id: {
       type: Sequelize.INTEGER,
       primaryKey: true,
@@ -14,20 +20,11 @@ module.exports = (sequelize, Sequelize, options) => {
       type: Sequelize.INTEGER,
       allowNull: false,
     },
-    created_by: {
-      type: Sequelize.INTEGER
-    },
-    created_at: {
-      type: Sequelize.DATE,
-      defaultValue: Sequelize.NOW,
-    },
-    updated_by: {
-      type: Sequelize.INTEGER
-    },
-    updated_at: {
-      type: Sequelize.DATE,
-    },
-  }, { ...options });
+  }, {
+    sequelize,
+    modelName: 'user_role',
+    ...options,
+  });
 
-  return model;
+  return UserRole;
 };

@@ -1,22 +1,17 @@
-const { Op, QueryTypes } = require("sequelize");
+const { Op, QueryTypes, Utils } = require("sequelize");
 const { sequelize } = appRequire("models");
 
 class BaseRepository {
   constructor(request, model) {
-    if (!request ) throw new Error("Request Required");
-
     this.request = request;
     this.model = appRequire("models")[model];
+
     this.data = {};
+    this.bulkData = [];
     this.where = {};
-    this.order = [];
-    this.group = [];
-    this.offset = null;
-    this.limit = null;
     this.include = [];
+    this.trash = false;
     this.options = {
-      // raw: true,
-      // subQuery: false,
       nest: true,
     };
   }
@@ -32,12 +27,20 @@ class BaseRepository {
   get selectAttributes() {
     return {
       where: this.where,
-      order: this.order,
-      group: this.group,
-      offset: this.offset,
-      limit: this.limit,
       include: this.include,
     }
+  }
+
+  get associations() {
+    return this.model.associations;
+  }
+
+  hasRelation(modelName) {
+    let result = !!this.associations[modelName];
+    if (!result) {
+      result = !!this.associations[Utils.pluralize(modelName)];
+    }
+    return result;
   }
 
   hasAttribute(attribute) {
@@ -45,7 +48,6 @@ class BaseRepository {
   }
 
   setData(data, isNewRecord = false) {
-    this.data = {};
     this.data = data || {};
 
     // set created by and updated by
@@ -60,27 +62,21 @@ class BaseRepository {
     }
   }
 
-  setWhere(where, isUpdateOrDelete = false) {
-    this.where = {};
-    if (isUpdateOrDelete) {
-      if (!where || !isObject(where)) {
-        throw new Error("Where Must be an Object");
-      }
-  
-      // this is to prevent from updating or deleting all records
-      if (Object.keys(where).length === 0) {
-        throw new Error("Where Object Cannot be Empty");
+  setBulkData(bulkData) {
+    this.bulkData = bulkData || [];
+
+    if (this.request && this.request.user) {
+      if (this.hasAttribute("created_by")) {
+        this.bulkData = this.bulkData.map((v) => ({
+          ...v,
+          created_by: this.request.user.id,
+        }));
       }
     }
+  }
 
-    this.where = where || {};
-
-    if (!isUpdateOrDelete) {
-      // by default, find query will add "deleted_at IS NULL"
-      if (this.hasAttribute("deleted_at") && !this.where.hasOwnProperty("deleted_at")) {
-        this.where.deleted_at = null;
-      }
-    }
+  setWhere(where) {
+    this.where = where;
   }
 
   setInclude(include) {
@@ -97,40 +93,22 @@ class BaseRepository {
     this.include = include;
   }
 
-  setOrder(order) {
-    this.order = order;
-  }
-
-  setGroup(group) {
-    this.group = group;
-  }
-
-  setOffset(offset) {
-    this.offset = offset != null ? Number(offset) : null;
-  }
-
-  setLimit(limit) {
-    this.limit = limit != null ? Number(limit) : null;
+  setOptions(options) {
+    this.options = { ...this.options, ...options };
   }
 
   setAllAttributes({
     where,
-    order,
-    group,
-    offset,
-    limit,
     include,
+    ...options
   }) {
     this.setWhere(where);
-    this.setOrder(order);
-    this.setGroup(group);
-    this.setOffset(offset);
-    this.setLimit(limit);
     this.setInclude(include);
+    this.setOptions({ ...options });
   }
 
   async findByPk({ id, ...rest }) {
-    this.setAllAttributes({...rest});
+    this.setAllAttributes(rest);
     let process = await this.model.findByPk(id, {
       ...this.selectAttributes,
       ...this.options
@@ -140,125 +118,164 @@ class BaseRepository {
 
   async findOne({ ...rest } = {}) {
     this.setAllAttributes({ ...rest });
-    let process = await this.model.findOne(this.selectAttributes, this.options);
+    let process = await this.model.findOne({ ...this.selectAttributes, ...this.options });
     return process;
   }
 
   async count({ ...rest } = {}) {
     this.setAllAttributes({ ...rest });
-    let process = await this.model.count(this.selectAttributes, this.options);
+    let process = await this.model.count({ ...this.selectAttributes, ...this.options });
     return process;
   }
 
   async findAll({ ...rest } = {}) {
-    this.setAllAttributes({...rest});
-    let process = await this.model.findAll(this.selectAttributes, this.options);
+    this.setAllAttributes({ ...rest });
+    let process = await this.model.findAll({ ...this.selectAttributes, ...this.options });
     return process;
   }
 
-  async create({ data, addOptions = {} }) {
+  async create({ data, ...rest }) {
+    this.setAllAttributes({ ...rest });
     this.setData(data, true);
-    let process = await this.model.create(this.data, addOptions);
+    let process = await this.model.create(this.data, {
+      individualHooks: true,
+      ...this.options,
+    });
     return process;
   }
 
-  async update({ data, where, addOptions = {} }) {
+  async bulkCreate({ data, ...rest }) {
+    this.setBulkData(data);
+    this.setAllAttributes({ ...rest });
+    let process = await this.model.bulkCreate(this.bulkData, {
+      // individualHooks: true,
+      ...this.options,
+    });
+    return process;
+  }
+
+  async update({ data, ...rest }) {
     this.setData(data);
-    this.setWhere(where, true);
-    this.primaryKey.forEach(key => delete this.data[key]);
+    this.setAllAttributes(rest);
     let process = await this.model.update(this.data, {
       where: this.where,
       individualHooks: true,
-      ...addOptions,
+      ...this.options,
     });
     return process;
   }
 
-  async softDelete({ where }) {
-    this.setWhere(where, true);
-    let process = await this.model.update({ deleted_at: new Date() }, {
-      where: this.where,
-      individualHooks: true,
-    });
-    return process;
-  }
-
-  async destroy({ where }) {
-    this.setWhere(where, true);
+  async destroy({ ...rest }) {
+    this.setAllAttributes(rest);
     let process = await this.model.destroy({
       where: this.where,
       individualHooks: true,
+      ...this.options,
     })
     return process;
   }
 
-  async truncate() {
-    let process = await this.model.destroy({ truncate: true });
+  async truncate({ ...rest }) {
+    this.setAllAttributes(rest);
+    let process = await this.model.destroy({
+      truncate: true,
+      ...this.options,
+    });
     return process;
+  }
+
+  async upsert({ data, ...rest }) {
+    this.setData(data, true);
+    this.setAllAttributes(rest);
+    let process = await this.model.upsert(this.data, {
+      individualHooks: true,
+      ...this.options,
+    });
+    return process;
+  }
+
+  async firstAndUpdate({ data, where, ...rest }) {
+    const instance = await this.findOne({ where, ...rest });
+    if (!instance) {
+      throw new NotFoundError(this.model.name + " Not Found");
+    }
+    await this.update({
+      data,
+      where,
+      ...rest,
+    });
+    return instance.reload();
+  }
+
+  async firstAndDestroy({ where, ...rest }) {
+    const instance = await this.findOne({ where, ...rest });
+    if (!instance) {
+      throw new NotFoundError(this.model.name + " Not Found");
+    }
+    await this.destroy({
+      where,
+      ...rest,
+    });
+    return instance;
   }
 
   async selectRaw({ query, ...rest }) {
+    this.setAllAttributes(rest);
     let process = await sequelize.query(query, {
       type: QueryTypes.SELECT,
-      ...rest,
+      ...this.options,
     });
     return process;
   }
 
-  async dataTable({
-    where = {},
+  async generateQuery({
+    columns,
+    query: baseQuery,
+    search,
+    page = 0,
+    limit = 20,
     sort,
-    query,
-    page,
-    limit,
-    ...rest
-  } = {}) {
-    let queryTerm = {};
-    if (query) {
-      this.attributes.map(v => {
-        if (this.model.rawAttributes[v].type.constructor.name !== "DATE") {
-          queryTerm[v] = {
-            [Op.like]: "%" + query + "%"
-          }
-        }
-      });
+  }) {
+    let addQuery = "";
+    let replacements = [];
+    let condition = "";
+    let select = columns.map(v => {
+      if (isArray(v)) return `${v[0]} AS ${v[1]}`;
+      return v;
+    }).join(", ");
 
-      if (this.include.length) {
-        Object.keys(this.include)
-      }
-      queryTerm ={
-        [Op.or]: queryTerm,
-      }
+    baseQuery = baseQuery.replace("{{columns}}", select);
+
+    if (search) {
+      condition = columns.map(v => {
+        let col = isArray(v) ? v[1] : v;
+        return `${col} LIKE ?`;
+      }).join(" OR ");
+      addQuery += `WHERE (${condition}) `;
+      replacements = Array(columns.length).fill("%" + search + "%");
     }
-    where = {
-      ...where,
-      ...queryTerm,
-    };
-    let order = [];
+
     if (sort) {
-      sort = sort.split(':');
-      order = [[sort[0], sort[1]]];
+      sort = sort.split(":");
+      addQuery += `ORDER BY ${sort[0]} ${sort[1]} `;
     }
-    this.setAllAttributes({
-      ...rest,
-      offset: page * limit,
-      limit,
-      where,
-      order,
-    });
 
-    let data = await this.model.findAndCountAll({
-      ...this.selectAttributes,
-      ...this.options,
-    });
+    let queryCount = `SELECT COUNT(*) AS total FROM (${baseQuery}) src ${addQuery}`;
+    addQuery += `LIMIT ${page * limit}, ${limit}`;
+    let queryData = `SELECT * FROM (${baseQuery}) src ${addQuery}`;
+
+    let [data, { total }] = await Promise.all([
+      this.selectRaw({ query: queryData, replacements }),
+      this.selectRaw({ query: queryCount, replacements, plain: true }),
+    ]);
 
     return {
-      data: data.rows,
-      from: 1,
-      to: Math.ceil(data.count / this.limit),
-      total: data.count
-    };
+      data,
+      total,
+      totalPage: Math.ceil(total / limit),
+    }
   }
+
 }
 
 module.exports = BaseRepository;

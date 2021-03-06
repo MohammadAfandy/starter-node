@@ -1,27 +1,9 @@
-const ProductRepository = appRequire("repositories", "product");
-const tableLib = appRequire("libs", "table");
+const productRepo = appRequire("repositories", "product");
 
 exports.index = async (req, res, next) => {
   try {
-    const columns = [
-      ['p.id', 'id'],
-      ['p.code', 'code'],
-      ['p.name', 'name'],
-      ['c.name', 'category'],
-      ['c.id', 'category_id'],
-      ['p.description', 'description'],
-      ['p.created_at', 'created_at'],
-    ];
-    const query =  `
-      SELECT {{columns}}
-      FROM product p
-      LEFT JOIN category c ON p.category_id = c.id
-      WHERE p.deleted_at IS NULL
-    `;
     const { q: search, page, limit, sort } = req.query; 
-    const data = await tableLib.generatePagination({
-      req, query, search, page, limit, sort, columns
-    })
+    const data = await productRepo(req).getAll({ search, page, limit, sort });
     res.success(data);
   } catch (error) {
     next(error);
@@ -30,8 +12,7 @@ exports.index = async (req, res, next) => {
 
 exports.store = async (req, res, next) => {
   try {
-    const product = new ProductRepository(req);
-    let data = await product.create({ data: req.body });
+    let data = await productRepo(req).create({ data: req.body });
     console.log("data", data);
     res.success(data);
   } catch (error) {
@@ -41,8 +22,7 @@ exports.store = async (req, res, next) => {
 
 exports.findOne = async (req, res, next) => {
   try {
-    const product = new ProductRepository(req);
-    let data = await product.findByPk({ id: req.params.id });
+    let data = await productRepo(req).findByPk({ id: req.params.id });
     if (!data) throw new NotFoundError("Product Not Found")
     res.success(data);
   } catch (error) {
@@ -52,13 +32,12 @@ exports.findOne = async (req, res, next) => {
 
 exports.update = async (req, res, next) => {
   try {
-    const product = new ProductRepository(req);
-    let data = await product.findByPk({ id: req.params.id });
-    if (!data) throw new NotFoundError("product Not Found")
-
-    data = Object.assign(data.dataValues, req.body);
-    await product.update({ data, where: { id: data.id } })
-    res.success(data);
+    const { code, description, name, category_id } = req.body;
+    const process = await productRepo(req).firstAndUpdate({
+      where: { id: req.params.id },
+      data: { code, description, name, category_id }
+    });
+    res.success(process);
   } catch (error) {
     next(error);
   }
@@ -66,12 +45,8 @@ exports.update = async (req, res, next) => {
 
 exports.destroy = async (req, res, next) => {
   try {
-    const product = new ProductRepository(req);
-    let data = await product.findByPk({ id: req.params.id });
-    if (!data) throw new NotFoundError("Product Not Found");
-
-    await product.softDelete({ where: { id: data.id } });
-    res.success(data);
+    const process = await productRepo(req).firstAndDestroy({ where: { id: req.params.id } });
+    res.success(process);
   } catch (error) {
     next(error);
   }

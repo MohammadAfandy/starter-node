@@ -6,4 +6,6 @@ class UserRoleRepository extends BaseRepository {
   }
 }
 
-module.exports = UserRoleRepository;
+module.exports = (req) => {
+  return (new UserRoleRepository(req));
+};

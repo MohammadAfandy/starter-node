@@ -1,5 +1,11 @@
-module.exports = (sequelize, Sequelize) => {
-  const model = sequelize.define("log_request", {
+const BaseModel = appRequire("models", "base");
+
+module.exports = (sequelize, Sequelize, options) => {
+  class LogRequest extends BaseModel {
+
+  }
+
+  LogRequest.init({
     id: {
       type: Sequelize.INTEGER,
       primaryKey: true,
@@ -35,11 +41,10 @@ module.exports = (sequelize, Sequelize) => {
       defaultValue: Sequelize.NOW,
     },
   }, {
-    timestamps: false,
-    freezeTableName: true,
-    engine: 'InnoDB',
-    charset: 'utf8',
+    sequelize,
+    modelName: 'log_request',
+    ...options,
   });
 
-  return model;
+  return LogRequest;
 };

@@ -1,7 +1,16 @@
-const { baseUrl } = appRequire("config");
+const BaseModel = appRequire("models", "base");
 
 module.exports = (sequelize, Sequelize, options) => {
-  const model = sequelize.define("users", {
+  class User extends BaseModel {
+    toJSON () {
+      // hide protected fields
+      let attributes = Object.assign({}, this.get());
+      delete attributes['password'];
+      return attributes
+    }
+  }
+
+  User.init({
     id: {
       type: Sequelize.INTEGER,
       primaryKey: true,
@@ -41,30 +50,17 @@ module.exports = (sequelize, Sequelize, options) => {
       type: Sequelize.DATE,
       defaultValue: Sequelize.NOW,
     },
-    deleted_at: {
-      type: Sequelize.DATE,
-    },
     created_by: {
       type: Sequelize.INTEGER
-    },
-    created_at: {
-      type: Sequelize.DATE,
-      defaultValue: Sequelize.NOW,
     },
     updated_by: {
       type: Sequelize.INTEGER
     },
-    updated_at: {
-      type: Sequelize.DATE,
-    },
-  }, options);
+  }, {
+    sequelize,
+    modelName: 'users',
+    ...options,
+  });
 
-  model.prototype.toJSON = function () {
-    let values = Object.assign({}, this.get());
-    values.image_path = values.image_path && (baseUrl + "/uploads/" + values.image_path);
-    delete values.password;
-    return values;
-  };
-
-  return model;
+  return User;
 };

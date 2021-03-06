@@ -3,7 +3,7 @@ class NotFoundError extends Error {
     super();
     this.status_code = 404;
     this.message = message || "Not Found";
-    this.data = errData || {};
+    this.data = { message: this.message, ...errData };
   }
 }
 
@@ -12,7 +12,7 @@ class BadRequestError extends Error {
     super();
     this.status_code = 400;
     this.message = message || "Bad Request";
-    this.data = errData || {};
+    this.data = { message: this.message, ...errData };
   }
 }
 
@@ -21,16 +21,16 @@ class UnauthorizedError extends Error {
     super();
     this.status_code = 401;
     this.message = message || "Unauthorized";
-    this.data = errData || {};
+    this.data = { message: this.message, ...errData };
   }
 }
 
 class ForbiddenError extends Error {
   constructor(message, errData) {
     super();
-    this.status_code = 401;
+    this.status_code = 403;
     this.message = message || "Forbidden";
-    this.data = errData || {};
+    this.data = { message: this.message, ...errData };
   }
 }
 

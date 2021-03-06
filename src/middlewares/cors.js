@@ -1,17 +1,21 @@
 const cors = require("cors");
-// const { allowedOrigin } = appRequire("config");
+const myCache = appRequire("utils", "cache");
 
-// const corsMiddleware = cors({
-//   origin: (origin, callback) => {
-//     const isAllowed = allowedOrigin.some(v => new RegExp(v, "i").test(origin));
-//     if (isAllowed) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error("Your IP Doesn't"));
-//     }
-//   }
-// });
-
-const corsMiddleware = cors();
+const corsMiddleware = cors({
+  origin: (origin, callback) => {
+    const allowedOrigin = myCache.get('allowed_origin');
+    let isAllowed = false;
+    if (!origin) { // from same origin
+      isAllowed = true;
+    } else {
+      isAllowed = allowedOrigin ? (allowedOrigin.includes(origin)) : false;
+    }
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
+});
 
 module.exports = corsMiddleware;

@@ -1,5 +1,11 @@
-module.exports = (sequelize, Sequelize) => {
-  const model = sequelize.define("log_audit_db", {
+const BaseModel = appRequire("models", "base");
+
+module.exports = (sequelize, Sequelize, options) => {
+  class LogAuditDb extends BaseModel {
+
+  }
+
+  LogAuditDb.init({
     id: {
       type: Sequelize.INTEGER,
       primaryKey: true,
@@ -30,11 +36,10 @@ module.exports = (sequelize, Sequelize) => {
       type: Sequelize.NOW,
     },
   }, {
-    timestamps: false,
-    freezeTableName: true,
-    engine: 'InnoDB',
-    charset: 'utf8',
+    sequelize,
+    modelName: 'log_audit_db',
+    ...options,
   });
 
-  return model;
+  return LogAuditDb;
 };

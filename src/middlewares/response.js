@@ -4,58 +4,25 @@ const config = appRequire("config");
 const logger = appRequire("config", "logger");
 const { logRequest } = appRequire("utils", "log");
 
-const handleSequelizeError = (err, response) => {
-  if (err instanceof Sequelize.ValidationError) {
-    response.code = 422;
-    response.message = "Validation Error";
-    response.error = err.errors.map(v => {
-      return {
-        key: v.path,
-        type: v.type,
-      }
-    });
-  } else if (err instanceof Sequelize.ForeignKeyConstraintError) {
-    response.code = 400;
-    response.message = "Foreign Key Constraint Error";
-    response.error = {};
-  } else if (err instanceof Sequelize.UniqueConstraintError) {
-    response.code = 400;
-    response.message = "Unique Constraint Error";
-    response.error = {};
-  }
-
-  return response;
-};
-
-const handleValidationError = (err, response) => {
-  if (err instanceof ValidationError) {
-    response.code = 422;
-    response.message = "Validation Error";
-    response.error = err.data.map(v => {
-      return {
-        param: v.param,
-        message: v.msg,
-      }
-    });
-  }
-
-  return response;
-};
-
 const response = async (req, res, next) => {
 
-  const sendResponse = response => {
+  const sendResponse = (response, request) => {
     if (logging.request) logRequest(response.code, req, response);
+    if (request.start_time) {
+      response.execution_time = `${(new Date()).getTime() - request.start_time} ms`;
+    }
     return res.status(response.code).json(response);
   }
 
   let response = {
-    version: config.version,
-    path: req.originalUrl,
-    method: req.method,
-    timestamp: new Date(),
     code: "",
     message: "",
+    timestamp: new Date().getTime(),
+    error: false,
+    data: {},
+    // version: config.version,
+    // path: req.originalUrl,
+    // method: req.method,
   }
 
   res.success = (data, message, code) => {
@@ -63,34 +30,37 @@ const response = async (req, res, next) => {
     response.message = message || "Success";
     response.data = data || {};
 
-    logger.http(`${response.path} - ${response.code} - ${response.message}`);
-    sendResponse(response);
+    logger.http(`${req.originalUrl} - ${response.code} - ${response.message}`);
+    sendResponse(response, req);
   }
 
-  res.notFound = (message) => {
-    response.code = 404;
-    response.message = message || "Not Found";
-    response.error = {};
-
-    logger.info(`${response.path} - ${response.code} - ${response.message}`);
-    sendResponse(response);
-  }
-
-  res.error = (err, message, code, error) => {
-    response = handleSequelizeError(err, response);
-    response = handleValidationError(err, response);
-
-    if (response.code == "") {
-      response.code = code || err.status_code || 500;
-      response.message = message || err.message || "Internal Server Error";
-      response.error = error || err.data || {};
-
-      if (config.debug) {
-        response.stack = err.stack;
+  res.error = (err) => {
+    
+    if (err instanceof ValidationError) {
+      if (err.data && err.data.length) {
+        err.data = err.data.map(v => {
+          return {
+            param: v.param,
+            message: v.msg,
+          }
+        });
       } else {
-        if (response.code >= 500) {
-          response.message = "Internal Server Error";
-        }
+        err.data = [{
+          param: null,
+          message: err.message, 
+        }]
+      }
+    }
+
+    response.code = err.status_code || 500;
+    response.message = err.message || "Internal Server Error";
+    response.error = err.data || {};
+
+    if (config.debug) {
+      response.error.stack = err.stack;
+    } else {
+      if (response.code >= 500) {
+        response.message = "Internal Server Error";
       }
     }
 
@@ -100,7 +70,7 @@ const response = async (req, res, next) => {
       logger.error(err);
     }
 
-    sendResponse(response);
+    sendResponse(response, req);
   }
 
   next();
