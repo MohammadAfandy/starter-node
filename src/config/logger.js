@@ -1,6 +1,5 @@
 const winston = require("winston");
 const moment = require("moment");
-const TelegramLogger = require("winston-telegram");
 const { rootPath, logging } = appRequire("config");
 
 const errorFormat = winston.format(info => {
@@ -43,23 +42,12 @@ const options = {
     prettyPrint: true,
     format: winston.format.combine(winston.format.colorize(), logFormat),
   },
-  telegram: {
-    token: logging.telegram.token,
-    chatId: logging.telegram.chatId,
-    handleExceptions: true,
-    level: "warn",
-    silent: !logging.telegram.enable,
-  }
 };
 
 let transports = [
   new winston.transports.File(options.file),
   new winston.transports.Console(options.console),
 ]
-
-if (logging.telegram.enable) {
-  transports.push(new TelegramLogger(options.telegram));
-}
 
 let logger = new winston.createLogger({
   transports: transports,

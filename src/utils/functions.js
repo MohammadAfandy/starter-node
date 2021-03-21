@@ -2,6 +2,7 @@ const { rootPath, uploadDir } = require("../config");
 const fs = require("fs");
 const moment = require("moment");
 const listEndpoints = require('express-list-endpoints');
+const ejs = require("ejs");
 
 const appRequire = (moduleName, ...filePath) => {
   const availableModules = [
@@ -14,6 +15,7 @@ const appRequire = (moduleName, ...filePath) => {
     "services",
     "utils",
     "validators",
+    "views",
   ];
   if (availableModules.indexOf(moduleName) <= -1) throw new Error(`Module '${moduleName}' not available`);
 
@@ -113,6 +115,43 @@ const getAllRoutes = () => {
   return res;
 }
 
+
+const maskSensitive = (obj) => {
+  const mask_keys = [
+    "password",
+    "password_confirmation",
+    // "otp_code",
+    // ...
+  ];
+  const mask_value = "[masked]";
+
+  for (let prop in obj) {
+    if (prop in obj) {
+      if (typeof obj[prop] === "object") {
+        maskSensitive(obj[prop]);
+      } else {
+        if (mask_keys.includes(prop)) {
+          obj[prop] = mask_value;
+        }
+      }
+    }
+  }
+
+  return obj;
+};
+
+const renderFile = async (fileName, data) => {
+  try {
+    let arr = fileName.split('.');
+    let ext = arr[arr.length - 1];
+    if (ext && ext !== 'ejs') fileName += '.ejs';
+    const filePath = `${rootPath}/src/views/${fileName}`;
+    return (await ejs.renderFile(filePath, data));
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
 exports.appRequire = appRequire;
 exports.isString = isString;
 exports.isArray = isArray;
@@ -122,3 +161,5 @@ exports.makeDir = makeDir;
 exports.moveUploadedFile = moveUploadedFile;
 exports.fancyLog = fancyLog;
 exports.getAllRoutes = getAllRoutes;
+exports.maskSensitive = maskSensitive;
+exports.renderFile = renderFile;

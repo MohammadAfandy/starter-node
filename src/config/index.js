@@ -60,10 +60,10 @@ module.exports = {
     auditDb: checkFalsyEnv(process.env.AUDIT_DB_LOG),
     request: checkFalsyEnv(process.env.REQUEST_LOG),
     dialect: process.env.DIALECT_LOG,
-    telegram: {
-      enable: checkFalsyEnv(process.env.TELEGRAM_LOG),
-      token: process.env.TELEGRAM_TOKEN,
-      chatId: process.env.TELEGRAM_CHAT_ID,
-    },
-  }
+  },
+  telegram: {
+    token: process.env.TELEGRAM_TOKEN,
+    log: checkFalsyEnv(process.env.TELEGRAM_LOG),
+    logChatId: process.env.TELEGRAM_LOG_CHAT_ID,
+  },
 }

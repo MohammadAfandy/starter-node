@@ -3,6 +3,7 @@ const { logging } = appRequire("config");
 const config = appRequire("config");
 const logger = appRequire("config", "logger");
 const { logRequest } = appRequire("utils", "log");
+const TelegramApi = appRequire("services", "telegram");
 
 const response = async (req, res, next) => {
 
@@ -68,6 +69,10 @@ const response = async (req, res, next) => {
       logger.warn(err);
     } else {
       logger.error(err);
+    }
+
+    if (config.telegram.log) {
+      TelegramApi.sendLogMessage(req, response);
     }
 
     sendResponse(response, req);

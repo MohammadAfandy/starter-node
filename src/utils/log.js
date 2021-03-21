@@ -46,32 +46,10 @@ const logRequest = async (code, request, response) => {
   return process;
 }
 
-const maskSensitive = obj => {
-  const mask_keys = [
-    "password",
-    "password_confirmation",
-    // "otp_code",
-    // ...
-  ];
-  const mask_value = "[masked]";
-
-  for (let prop in obj) {
-    if (prop in obj) {
-      if (typeof obj[prop] === "object") {
-        maskSensitive(obj[prop]);
-      } else {
-        if (mask_keys.includes(prop)) {
-          obj[prop] = mask_value;
-        }
-      }
-    }
-  }
-}
-
 const insertLog = async (type, dataLog, instance) => {
   try {
     // be wise bruh ...
-    maskSensitive(dataLog);
+    dataLog = maskSensitive(dataLog);
 
     let insertLog;
     if (logging.dialect === "sql") {

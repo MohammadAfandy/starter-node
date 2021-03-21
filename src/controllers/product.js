@@ -13,7 +13,6 @@ exports.index = async (req, res, next) => {
 exports.store = async (req, res, next) => {
   try {
     let data = await productRepo(req).create({ data: req.body });
-    console.log("data", data);
     res.success(data);
   } catch (error) {
     next(error)
