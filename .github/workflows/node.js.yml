@@ -19,5 +19,5 @@ jobs:
           cd /var/www/apps/starter-node
           git pull
           npm install
-            sequelize db:migrate
-            pm2 restart starter-node
+          sequelize db:migrate
+          pm2 restart starter-node
