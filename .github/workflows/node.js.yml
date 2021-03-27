@@ -14,7 +14,6 @@ jobs:
       - name: SSH and pull data
         working-directory: /var/www/apps/starter-node
         run: |
-          cd /var/www/apps/starter-node
           git pull
           npm install
           sequelize db:migrate
