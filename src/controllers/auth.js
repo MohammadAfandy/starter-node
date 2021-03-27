@@ -33,7 +33,7 @@ exports.login = async (req, res, next) => {
       phone_number: userData.phone_number,
       fullname: userData.fullname,
       roles: userData.roles.map(v => v.role_name),
-      image_path: baseUrl + '/uploads/' + userData.image_path,
+      image_path: userData.image_path && baseUrl + '/uploads/' + userData.image_path,
       access_token: tokenData.access_token,
       refresh_token: tokenData.refresh_token,
       device: tokenData.device,
