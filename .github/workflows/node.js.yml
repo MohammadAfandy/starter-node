@@ -9,14 +9,13 @@ on:
 
 jobs:
   build:
+
     runs-on: self-hosted
 
     steps:
-    - name: SSH and pull app
-      with:
-        script: |
-          cd /var/www/apps/starter-node
-          git pull
-          npm install
-          sequelize db:migrate
-          pm2 restart starter-node
+    - run: sudo su
+    - run: cd /var/www/apps/starter-node
+    - run: git pull
+    - run: npm install
+    - run: sequelize db:migrate
+    - run: pm2 restart starter-node
