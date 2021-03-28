@@ -10,6 +10,8 @@
   "author": "Mohammad Afandy",
   "license": "ISC",
   "dependencies": {
+    "@sentry/node": "^6.2.3",
+    "@sentry/tracing": "^6.2.3",
     "app-root-path": "^3.0.0",
     "axios": "^0.21.1",
     "bcryptjs": "^2.4.3",
