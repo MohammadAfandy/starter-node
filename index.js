@@ -12,9 +12,9 @@ Object.assign(global, appRequire("utils", "error"));
 const myCache = appRequire("utils", "cache");
 myCache.init();
 
-// add global middlewares
+// add pre global middlewares
 const middlewares = appRequire("middlewares");
-if (middlewares.length) app.use(...middlewares);
+if (middlewares.pre.length) app.use(...middlewares.pre);
 
 // static path
 for (let i in staticPath) {
@@ -28,6 +28,9 @@ app.use("/api", require("./src/routes"))
 app.use((req, res, next) => {
   throw new NotFoundError();
 });
+
+// add post global middlewares
+if (middlewares.post.length) app.use(...middlewares.post);
 
 // error handler
 app.use((err, req, res, next) => res.error(err));

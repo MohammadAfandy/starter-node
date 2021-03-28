@@ -68,11 +68,10 @@ const response = async (req, res, next) => {
     if (response.code >= 400 && response.code < 500) {
       logger.warn(err);
     } else {
+      if (config.telegram.log) {
+        TelegramApi.sendLogMessage(req, response);
+      }
       logger.error(err);
-    }
-
-    if (config.telegram.log) {
-      TelegramApi.sendLogMessage(req, response);
     }
 
     sendResponse(response, req);

@@ -66,4 +66,7 @@ module.exports = {
     log: checkFalsyEnv(process.env.TELEGRAM_LOG),
     logChatId: process.env.TELEGRAM_LOG_CHAT_ID,
   },
+  sentry: {
+    dsn: process.env.SENTRY_DSN,
+  }
 }

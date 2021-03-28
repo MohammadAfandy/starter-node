@@ -42,7 +42,7 @@ class UserRepository extends BaseRepository {
     let checkDuplicate = await this.checkDuplicate({
       username: newData.username,
       email: newData.email,
-      phone_number: newData.phone_number,
+      // phone_number: newData.phone_number,
     }, previousData.id);
 
     if (checkDuplicate.length) {

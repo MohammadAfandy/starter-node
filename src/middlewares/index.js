@@ -5,15 +5,24 @@ const corsMiddleware = appRequire("middlewares", "cors");
 const timeMiddleware = appRequire("middlewares", "time");
 const trimMiddleware = appRequire("middlewares", "trim");
 const multerMiddleware = appRequire("middlewares", "multer");
+const Sentry = appRequire("utils", "sentry");
 
-module.exports = [
-  responseMiddleware, // required (do not remove or change the position)
-  timeMiddleware,
-  corsMiddleware,
-  helmet(),
-  bodyParser.json(),
-  bodyParser.urlencoded({ extended: true }),
-  trimMiddleware,
-  multerMiddleware,
-  // ... add more middleware function
-];
+module.exports = {
+  // run before app hit route
+  pre: [
+    responseMiddleware, // required (do not remove or change the position)
+    Sentry.Handlers.requestHandler(),
+    timeMiddleware,
+    corsMiddleware,
+    helmet(),
+    bodyParser.json(),
+    bodyParser.urlencoded({ extended: true }),
+    trimMiddleware,
+    multerMiddleware,
+  ],
+
+  // run after app hit route
+  post: [
+    Sentry.Handlers.errorHandler(),
+  ],
+};
